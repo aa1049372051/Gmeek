@@ -75,6 +75,9 @@ class GMEEK():
         if "faviconUrl" not in self.blogBase:
             self.blogBase["faviconUrl"]=self.blogBase["avatarUrl"]
 
+        if "defaultLabel" not in self.blogBase:
+            self.blogBase["defaultLabel"]='幸福生活'
+
         if "homeUrl" not in self.blogBase:
             if str(self.repo.name) == (str(self.repo.owner.login)+".github.io"):
                 self.blogBase["homeUrl"] = f"https://{self.repo.name}"
@@ -260,7 +263,16 @@ class GMEEK():
         feed.rss_file(self.root_dir+'rss.xml')
 
     def addOnePostJson(self,issue):
-        if len(issue.labels)==1:
+        labelLen=len(issue.labels)
+        defaultLabelName=self.blogBase["defaultLabel"]
+        if labelLen==0:
+            labelLen=1
+            issue.labels=[
+                {name:defaultLabelName}
+            ]
+        if labelLen>1:
+            labelLen=1
+        if labelLen==1:
             if issue.labels[0].name in self.blogBase["singlePage"]:
                 listJsonName='singeListJson'
                 gen_Html = self.root_dir+'{}.html'.format(issue.labels[0].name)
