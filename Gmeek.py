@@ -77,6 +77,9 @@ class GMEEK():
 
         if "defaultLabel" not in self.blogBase:
             self.blogBase["defaultLabel"]='幸福生活'
+        
+        if "defaultLabelColor" not in self.blogBase:
+            self.blogBase["defaultLabelColor"]='#D93F0B'
 
         if "homeUrl" not in self.blogBase:
             if str(self.repo.name) == (str(self.repo.owner.login)+".github.io"):
@@ -265,11 +268,15 @@ class GMEEK():
     def addOnePostJson(self,issue):
         labelLen=len(issue.labels)
         defaultLabelName=self.blogBase["defaultLabel"]
+        defaultLabelColor=self.blogBase["defaultLabelColor"]
         labelName=None
+        labelColor=None
         if labelLen>0:
             labelName=issue.labels[0].name 
+            labelColor=self.labelColorDict[labelName]
         if labelLen==0:
             labelName=defaultLabelName
+            labelColor=defaultLabelColor
         labelLen=1
         if labelLen==1:
             if labelName in self.blogBase["singlePage"]:
@@ -289,7 +296,7 @@ class GMEEK():
             self.blogBase[listJsonName][postNum]['number']=issue.number
             self.blogBase[listJsonName][postNum]["htmlDir"]=gen_Html
             self.blogBase[listJsonName][postNum]["label"]=labelName
-            self.blogBase[listJsonName][postNum]["labelColor"]=self.labelColorDict[labelName]
+            self.blogBase[listJsonName][postNum]["labelColor"]=labelColor
             self.blogBase[listJsonName][postNum]["postTitle"]=issue.title
             if self.blogBase["urlMode"]=="issue":
                 self.blogBase[listJsonName][postNum]["postUrl"]=urllib.parse.quote(self.post_folder+'{}.html'.format(str(issue.number)))
