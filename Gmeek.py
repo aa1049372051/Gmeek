@@ -266,12 +266,11 @@ class GMEEK():
         labelLen=len(issue.labels)
         defaultLabelName=self.blogBase["defaultLabel"]
         labelName=None
-        if labelLen==0:
-            labelName=defaultLabelName
-        if labelLen>1:
-            labelLen=1
         if labelLen>0:
             labelName=issue.labels[0].name 
+        if labelLen==0:
+            labelName=defaultLabelName
+        labelLen=1
         if labelLen==1:
             if labelName in self.blogBase["singlePage"]:
                 listJsonName='singeListJson'
