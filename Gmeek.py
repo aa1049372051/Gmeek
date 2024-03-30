@@ -265,17 +265,17 @@ class GMEEK():
     def addOnePostJson(self,issue):
         labelLen=len(issue.labels)
         defaultLabelName=self.blogBase["defaultLabel"]
+        labelName=None
         if labelLen==0:
-            labelLen=1
-            issue.labels=[
-                {name:defaultLabelName}
-            ]
+            labelName=defaultLabelName
         if labelLen>1:
             labelLen=1
+        if labelLen>0:
+            labelName=issue.labels[0].name 
         if labelLen==1:
-            if issue.labels[0].name in self.blogBase["singlePage"]:
+            if labelName in self.blogBase["singlePage"]:
                 listJsonName='singeListJson'
-                gen_Html = self.root_dir+'{}.html'.format(issue.labels[0].name)
+                gen_Html = self.root_dir+'{}.html'.format(labelName)
             else:
                 listJsonName='postListJson'
                 if self.blogBase["urlMode"]=="issue":
@@ -289,8 +289,8 @@ class GMEEK():
             self.blogBase[listJsonName][postNum]=json.loads('{}')
             self.blogBase[listJsonName][postNum]['number']=issue.number
             self.blogBase[listJsonName][postNum]["htmlDir"]=gen_Html
-            self.blogBase[listJsonName][postNum]["label"]=issue.labels[0].name
-            self.blogBase[listJsonName][postNum]["labelColor"]=self.labelColorDict[issue.labels[0].name]
+            self.blogBase[listJsonName][postNum]["label"]=labelName
+            self.blogBase[listJsonName][postNum]["labelColor"]=self.labelColorDict[labelName]
             self.blogBase[listJsonName][postNum]["postTitle"]=issue.title
             if self.blogBase["urlMode"]=="issue":
                 self.blogBase[listJsonName][postNum]["postUrl"]=urllib.parse.quote(self.post_folder+'{}.html'.format(str(issue.number)))
