@@ -39,6 +39,7 @@ class GMEEK():
         self.backup_dir='backup/'
         self.post_dir=self.root_dir+self.post_folder
 
+        # user = Github(self.options.github_token).get_user()  
         user = Github(self.options.github_token)
         self.repo = self.get_repo(user, options.repo_name)
         self.feed = FeedGenerator()
@@ -112,7 +113,7 @@ class GMEEK():
         f.write(output)
         f.close()
 
-    def createPostHtml(self,issue):
+    def createPostHtml(self,issue,prevIssue=None,nextIssue=None):
         f = open("backup/"+issue["postTitle"]+".md", 'r', encoding='UTF-8')
         post_body=self.markdown2html(f.read())
         f.close()
@@ -132,6 +133,17 @@ class GMEEK():
         postBase["top"]=issue["top"]
         postBase["postSourceUrl"]=issue["postSourceUrl"]
         postBase["repoName"]=options.repo_name
+        postBase['prevPostTitle']=''
+        postBase['nextPostTitle']=''
+        postBase['prevPostUrl']=''
+        postBase['nextPostUrl']=''
+        if prevIssue is not None:
+            postBase['prevPostTitle']=prevIssue['postTitle']
+            postBase['prevPostUrl']='/'+prevIssue['postUrl']
+        if nextIssue is not None:
+            postBase['nextPostTitle']=nextIssue['postTitle']
+            postBase['nextPostUrl']='/'+nextIssue['postUrl']
+
         
         if "highlight" in post_body:
             postBase["highlight"]=1
@@ -263,6 +275,7 @@ class GMEEK():
 
             postNum="P"+str(issue.number)
             self.blogBase[listJsonName][postNum]=json.loads('{}')
+            self.blogBase[listJsonName][postNum]['number']=issue.number
             self.blogBase[listJsonName][postNum]["htmlDir"]=gen_Html
             self.blogBase[listJsonName][postNum]["label"]=issue.labels[0].name
             self.blogBase[listJsonName][postNum]["labelColor"]=self.labelColorDict[issue.labels[0].name]
@@ -334,13 +347,20 @@ class GMEEK():
     def runAll(self):
         print("====== start create static html ======")
         self.cleanFile()
-
-        issues=self.repo.get_issues()
-        for issue in issues:
+        for issue in self.repo.get_issues():
             self.addOnePostJson(issue)
-
-        for issue in self.blogBase["postListJson"].values():
-            self.createPostHtml(issue)
+        postList= list(self.blogBase["postListJson"].values())
+        postListLen=len(postList)
+        i=0
+        for issue in postList:
+            prevIssue=None
+            nextIssue=None
+            if i>0:
+                prevIssue=postList[i-1]
+            if i<postListLen-1:
+                nextIssue=postList[i+1]
+            self.createPostHtml(issue,prevIssue,nextIssue)
+            i=i+1
 
         for issue in self.blogBase["singeListJson"].values():
             self.createPostHtml(issue)
@@ -353,7 +373,23 @@ class GMEEK():
         print("====== start create static html ======")
         issue=self.repo.get_issue(int(number_str))
         listJsonName=self.addOnePostJson(issue)
-        self.createPostHtml(self.blogBase[listJsonName]["P"+number_str])
+        prevIssue=None
+        nextIssue=None
+        if listJsonName == 'postListJson':
+            postList= list(self.blogBase["postListJson"].values())
+            postListLen=len(postList)
+            i=0
+            for issue in postList:
+                if i>0:
+                    prevIssue=postList[i-1]
+                if i<postListLen-1:
+                    nextIssue=postList[i+1]
+                else:
+                    nextIssue=None
+                if int(number_str)==int(issue['number']):
+                    break
+                i=i+1
+        self.createPostHtml(self.blogBase[listJsonName]["P"+number_str],prevIssue,nextIssue)
         self.createPlistHtml()
         self.createFeedXml()
         print("====== create static html end ======")

@@ -53,6 +53,14 @@
 
 {% block content %}
 <div class="markdown-body" id="postBody">{{ blogBase['postBody'] }}</div>
+<div>
+    {% if blogBase['prevPostUrl'] %}
+    <a style="float: left" id="prevPostUrl" href="{{ blogBase['prevPostUrl']|e }}">上一篇：{{ blogBase['prevPostTitle'] }}</a>
+    {% endif %}
+    {% if blogBase['nextPostUrl'] %}
+    <a style="float: right" id="nextPostUrl" href="{{ blogBase['nextPostUrl']|e }}">下一篇：{{ blogBase['nextPostTitle'] }}</a>
+    {% endif %}
+</div>
 <div style="font-size:small;margin-top:8px;float:right;">{{ blogBase['bottomText'] }}</div>
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">{{ i18n['comments'] }}</button>
 <div class="comments" id="comments"></div>
